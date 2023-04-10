@@ -43,26 +43,26 @@ def get_id_urls(url):
     Given a url, returns the corresponding id in the urls table.
     If no row exists for the url, then one is inserted automatically.
     '''
-    with connection.begin() as trans:
+    #with connection.begin() as trans:
+    sql = sqlalchemy.sql.text('''
+    insert into urls 
+        (url)
+        values
+        (:url)
+    on conflict do nothing
+    returning id_urls
+    ;
+    ''')
+    res = connection.execute(sql,{'url':url}).first()
+    if res is None:
         sql = sqlalchemy.sql.text('''
-        insert into urls 
-            (url)
-            values
-            (:url)
-        on conflict do nothing
-        returning id_urls
-        ;
+        select id_urls 
+        from urls
+        where
+            url=:url
         ''')
         res = connection.execute(sql,{'url':url}).first()
-        if res is None:
-            sql = sqlalchemy.sql.text('''
-            select id_urls 
-            from urls
-            where
-                url=:url
-            ''')
-            res = connection.execute(sql,{'url':url}).first()
-        id_urls = res[0]
+    id_urls = res[0]
     return id_urls
 
 
@@ -446,14 +446,14 @@ if __name__ == '__main__':
     # NOTE:
     # we reverse sort the filenames because this results in fewer updates to the users table,
     # which prevents excessive dead tuples and autovacuums
-    with connection.begin() as trans:
-        for filename in sorted(args.inputs, reverse=True):
-            with zipfile.ZipFile(filename, 'r') as archive: 
-                print(datetime.datetime.now(),filename)
-                for subfilename in sorted(archive.namelist(), reverse=True):
-                    with io.TextIOWrapper(archive.open(subfilename)) as f:
-                        tweets = []
-                        for i,line in enumerate(f):
-                            tweet = json.loads(line)
-                            tweets.append(tweet)
-                        insert_tweets(connection,tweets,args.batch_size)
+    # with connection.begin() as trans:
+    for filename in sorted(args.inputs, reverse=True):
+        with zipfile.ZipFile(filename, 'r') as archive: 
+            print(datetime.datetime.now(),filename)
+            for subfilename in sorted(archive.namelist(), reverse=True):
+                with io.TextIOWrapper(archive.open(subfilename)) as f:
+                    tweets = []
+                    for i,line in enumerate(f):
+                        tweet = json.loads(line)
+                        tweets.append(tweet)
+                    insert_tweets(connection,tweets,args.batch_size)
