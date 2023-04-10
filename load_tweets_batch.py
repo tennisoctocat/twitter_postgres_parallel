@@ -43,25 +43,26 @@ def get_id_urls(url):
     Given a url, returns the corresponding id in the urls table.
     If no row exists for the url, then one is inserted automatically.
     '''
-    sql = sqlalchemy.sql.text('''
-    insert into urls 
-        (url)
-        values
-        (:url)
-    on conflict do nothing
-    returning id_urls
-    ;
-    ''')
-    res = connection.execute(sql,{'url':url}).first()
-    if res is None:
+    with connection.begin() as trans:
         sql = sqlalchemy.sql.text('''
-        select id_urls 
-        from urls
-        where
-            url=:url
+        insert into urls 
+            (url)
+            values
+            (:url)
+        on conflict do nothing
+        returning id_urls
+        ;
         ''')
         res = connection.execute(sql,{'url':url}).first()
-    id_urls = res[0]
+        if res is None:
+            sql = sqlalchemy.sql.text('''
+            select id_urls 
+            from urls
+            where
+                url=:url
+            ''')
+            res = connection.execute(sql,{'url':url}).first()
+        id_urls = res[0]
     return id_urls
 
 
@@ -387,7 +388,7 @@ def _insert_tweets(connection,input_tweets):
                 'id_urls':id_urls,
                 'type':medium['type']
                 })
-    connection.commit() # It seems like there are existing transactions before this
+    #connection.commit() # It seems like there are existing transactions before this
     ######################################## 
     # STEP 2: perform the actual SQL inserts
     ######################################## 
