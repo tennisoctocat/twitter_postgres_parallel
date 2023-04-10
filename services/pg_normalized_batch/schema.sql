@@ -104,7 +104,7 @@ CREATE MATERIALIZED VIEW tweet_tags_total AS (
         row_number() over (order by count(*) desc) AS row,
         tag, 
         count(*) AS total
-    FROM tweet_tag
+    FROM tweet_tags
     GROUP BY tag
     ORDER BY total DESC
 );
