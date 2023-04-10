@@ -387,7 +387,7 @@ def _insert_tweets(connection,input_tweets):
                 'id_urls':id_urls,
                 'type':medium['type']
                 })
-
+    connection.commit() # It seems like there are existing transactions before this
     ######################################## 
     # STEP 2: perform the actual SQL inserts
     ######################################## 
