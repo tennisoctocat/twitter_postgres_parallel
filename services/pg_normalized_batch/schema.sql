@@ -4,12 +4,6 @@ CREATE EXTENSION postgis;
 
 BEGIN;
 /*
-CREATE TABLE urls (
-    id_urls BIGSERIAL PRIMARY KEY,
-    url TEXT UNIQUE
-);*/
-
-/*
  * Users may be partially hydrated with only a name/screen_name 
  * if they are first encountered during a quote/reply/mention 
  * inside of a tweet someone else's tweet.
@@ -18,14 +12,13 @@ CREATE TABLE users (
     id_users BIGINT PRIMARY KEY,
     created_at TIMESTAMPTZ,
     updated_at TIMESTAMPTZ,
-    url TEXT,
-    /* id_urls BIGINT REFERENCES urls(id_urls),*/
     friends_count INTEGER,
     listed_count INTEGER,
     favourites_count INTEGER,
     statuses_count INTEGER,
     protected BOOLEAN,
     verified BOOLEAN,
+    url TEXT,
     screen_name TEXT,
     name TEXT,
     location TEXT,
@@ -37,7 +30,7 @@ CREATE TABLE users (
  * Tweets may be entered in hydrated or unhydrated form.
  */
 CREATE TABLE tweets (
-    id_tweets BIGINT PRIMARY KEY,
+    ld_tweets BIGINT PRIMARY KEY,
     id_users BIGINT,
     created_at TIMESTAMPTZ,
     in_reply_to_status_id BIGINT,
