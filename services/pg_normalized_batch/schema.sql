@@ -3,6 +3,7 @@ CREATE EXTENSION postgis;
 \set ON_ERROR_STOP on
 
 BEGIN;
+
 /*
  * Users may be partially hydrated with only a name/screen_name 
  * if they are first encountered during a quote/reply/mention 
@@ -23,14 +24,14 @@ CREATE TABLE users (
     name TEXT,
     location TEXT,
     description TEXT,
-    withheld_in_countries VARCHAR(2)[],
+    withheld_in_countries VARCHAR(2)[]
 );
 
 /*
  * Tweets may be entered in hydrated or unhydrated form.
  */
 CREATE TABLE tweets (
-    ld_tweets BIGINT PRIMARY KEY,
+    id_tweets BIGINT PRIMARY KEY,
     id_users BIGINT,
     created_at TIMESTAMPTZ,
     in_reply_to_status_id BIGINT,
@@ -64,7 +65,7 @@ CREATE TABLE tweet_urls (
     id_tweets BIGINT,
     url TEXT,
     PRIMARY KEY (id_tweets, url),
-    FOREIGN KEY (id_tweets) REFERENCES tweets(id_tweets) DEFERRABLE INITIALLY DEFERRED,
+    FOREIGN KEY (id_tweets) REFERENCES tweets(id_tweets) DEFERRABLE INITIALLY DEFERRED
 );
 
 
@@ -89,7 +90,7 @@ CREATE INDEX tweet_tags_index ON tweet_tags(id_tweets);
 
 CREATE TABLE tweet_media (
     id_tweets BIGINT,
-    url TEXT
+    url TEXT,
     type TEXT,
     PRIMARY KEY (id_tweets, url),
     FOREIGN KEY (id_tweets) REFERENCES tweets(id_tweets) DEFERRABLE INITIALLY DEFERRED
@@ -103,7 +104,7 @@ CREATE MATERIALIZED VIEW tweet_tags_total AS (
         row_number() over (order by count(*) desc) AS row,
         tag, 
         count(*) AS total
-    FROM tweet_tags
+    FROM tweet_tag
     GROUP BY tag
     ORDER BY total DESC
 );
